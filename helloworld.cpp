@@ -4,6 +4,7 @@ using namespace std;
 int main()
 {
     cout<<"hello world!"<<endl;
-    cout<<"modify file for test git diff function!";
+    cout<<"modify file for test git diff function!"<<endl;
+    cout<<"New branch test"<<endl;
     return 0;
 }
