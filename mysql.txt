@@ -1,0 +1,234 @@
+一　MySQL中的数据类型　　　
+大的方面来分，可以分为：日期和时间、数值，以及字符串。下面就分开来进行总结。
+
+（１）日期和时间数据类型
+MySQL数据类型	    含义
+date	        3字节，日期，格式：2014-09-18
+time	        3字节，时间，格式：08:42:30
+datetime	    8字节，日期时间，格式：2014-09-18 08:42:30
+timestamp	    4字节，自动存储记录修改的时间
+year	        1字节，年份
+
+（２）数值数据类型
+（2.1）整型
+MySQL数据类型	            含义（有符号）                             描述
+tinyint[(M)]	        1字节，范围（-128~127）                    非常小的整数
+bit                     tinyint的同义词
+bool                    tinyint的同义词
+smallint[(M)]	        2字节，范围（-32768~32767）                小型整数
+mediumint[(M)]	        3字节，范围（-8388608~8388607）            中型整数
+int[(M)]	            4字节，范围（-2147483648~2147483647）      一般整数
+integer[(M)]            int的同义词
+bigint[(M)]	            8字节，范围（+-9.22*10的18次方）            大型整数
+
+注：上面定义的都是有符号的，当然了，也可以加上unsigned关键字，定义成无符号的类型，那么对应的取值范围就要翻翻了，比如：
+　　tinyint unsigned的取值范围为0~255。
+
+（2.2）浮点型
+MySQL数据类型	        含义
+float               取值范围取决于精度
+float(m, d)	        4字节，单精度浮点型，m总个数，d小数位
+double(m, d)	    8字节，双精度浮点型，m总个数，d小数位
+double              同double(m,d);
+precision[(m, d)]
+real[(m, d)]         同上
+decimal[(m, d)]	    decimal是存储为字符串的浮点数,范围取决于显示宽度m
+numeric[(m, d)]     decimal的同义词
+dec[(m, d)]         decimal的同义词
+fixed[(m, d)]       decimal的同义词
+
+注：在MySQL中建立了一个表，有一列为float(5, 3)；做了以下试验：
+　　1.插入123.45678，最后查询得到的结果为99.999；
+　　2.插入123.456，最后查询结果为99.999；
+　　3.插入12.34567，最后查询结果为12.346；
+　　所以，在使用浮点型的时候，还是要注意陷阱的，要以插入数据库中的实际结果为准。
+
+（2.3）字符串数据类型
+MySQL数据类型	    含义
+char(n)	        固定长度，最多255个字符
+varchar(n)	    可变长度，最多65535个字符
+tinytext	    可变长度，最多255个字符
+text	        可变长度，最多65535个字符
+mediumtext	    可变长度，最多2的24次方-1个字符
+longtext	    可变长度，最多2的32次方-1个字符
+注：
+　　1.char（n）和varchar（n）中括号中n代表字符的个数，并不代表字节个数，所以当使用了中文的时候(UTF8)意味着可以插入m个中文，但是实际会占用m*3个字节。
+　　2.同时char和varchar最大的区别就在于char不管实际value都会占用n个字符的空间，而varchar只会占用实际字符应该占用的空间+1，并且实际空间+1<=n。
+　　3.超过char和varchar的n设置后，字符串会被截断。
+　　4.char的上限为255字节，varchar的上限65535字节，text的上限为65535。
+　　5.char在存储的时候会截断尾部的空格，varchar和text不会。
+　　6.varchar会使用1-3个字节来存储长度，text不会。
+
+（2.4）TEXT和BLOB类型
+MySQL数据类型       最大长度（字符数）       描述
+TINYBLOB           0~255 (2^8 - 1)       小二进制大对象(BLOB)字段
+TINYTEXT           0~255 (2^8 - 1)       小TEXT字段
+TEXT               0~65535(2^16 - 1)     常规大小TEXT字段
+MEDIUMTEXT         (2^24 - 1)            中型大小TEXT字段
+LONGTEXT           (2^32 - 1)            长TEXT字段
+
+
+（2.5）其它类型
+1.enum(“member1″, “member2″, … “member65535″)
+enum数据类型就是定义了一种枚举，最多包含65535个不同的成员。当定义了一个enum的列时，该列的值限制为列定义中声明的值。如果列声明包含NULL属性，则NULL将被
+认为是一个有效值，并且是默认值。如果声明了NOT NULL，则列表的第一个成员是默认值。
+2.set(“member”, “member2″, … “member64″)
+set数据类型为指定一组预定义值中的零个或多个值提供了一种方法，这组值最多包括64个成员。值的选择限制为列定义中声明的值。
+注：mysql中的字符串数据类型set，enum
+　　1、enum
+　　单选字符串数据类型，适合存储表单界面中的“单选值”。
+　　设定enum的时候，需要给定“固定的几个选项”；存储的时候就只存储其中的一个值。
+　　设定enum的格式：
+　　　　enum("选项1","选项2","选项3",...)；
+　　实际上，enum的选项都会对应一个数字，依次是1，2，3，4，5...，最多有65535个选项
+　　使用的时候，可以使用选项的字符串格式，也可以使用对应的数字。
+
+　　2、set
+　　多选字符串数据类型，适合存储表单界面的“多选值”。
+　　设定set的时候，同样需要给定“固定的几个选项”；存储的时候，可以存储其中的若干个值。
+　　设定set的格式：
+　　　　set("选项1","选项2","选项3",...)
+　　同样的，set的每个选项值也对应一个数字，依次是1，2，4，8，16...，最多有64个选项
+　　使用的时候，可以使用set选项的字符串本身（多个选项用逗号分隔），也可以使用多个选项的数字之和（比如：1+2+4=7）
+********************************************************************************************************************************
+二　Mysql数据类型属性
+
+1.auto_increment
+　　auto_increment能为新插入的行赋一个唯一的整数标识符。为列赋此属性将为每个新插入的行赋值为上一次插入的ID+1。MySQL要求将auto_increment属性用于作
+为主键的列。此外，每个表只允许有一个auto_increment列。例如：
+　　［id smallint not null auto_increment primary key］
+
+2.binary
+　　binary属性只用于char和varchar值。当为列指定了该属性时，将以区分大小写的方式排序。与之相反，忽略binary属性时，将使用不区分大小写的方式排序。例如：
+　　［hostname char(25) binary not null］
+
+3.default
+　　default属性确保在没有任何值可用的情况下，赋予某个常量值，这个值必须是常量，因为MySQL不允许插入函数或表达式值。此外，此属性无法用于BLOB或TEXT列。
+如果已经为此列指定了NULL属性，没有指定默认值时默认值将为NULL，否则默认值将依赖于字段的数据类型。
+　　［subscribed enum('0', '1') not null default '0'］
+
+4.index
+　　如果所有其他因素都相同，要加速数据库查询，使用索引通常是最重要的一个步骤。索引一个列会为该列创建一个有序的键数组，每个键指向其相应的表行。以后针对输
+入条件可以搜索这个有序的键数组，与搜索整个未索引的表相比，这将在性能方面得到极大的提升。
+　　［
+　　create table employees
+    (
+    　id varchar(9) not null,
+    　firstname varchar(15) not null,
+    　lastname varchar(25) not null,
+    　email varchar(45) not null,
+   　 phone varchar(10) not null,
+    　index lastname(lastname),
+    　primary key(id)
+    );
+　　］
+
+5.not null
+　　如果将一个列定义为not null，将不允许向该列插入null值。建议在重要情况下始终使用not null属性，因为它提供了一个基本验证，确保已经向查询传递了所有必
+要的值。
+
+6.null
+　　为列指定null属性时，该列可以保持为空，而不论行中其它列是否已经被填充。记住，null精确的说法是“无”，而不是空字符串或0。
+
+7.primary key
+　　primary key属性用于确保指定行的唯一性。指定为主键的列中，值不能重复，也不能为空。为指定为主键的列赋予auto_increment属性是很常见的，因为此列不必
+与行数据有任何关系，而只是作为一个唯一标识符。主键又分为以下两种：
+　　(1)单字段主键
+　　如果输入到数据库中的每行都已经有不可修改的唯一标识符，一般会使用单字段主键。注意，此主键一旦设置就不能再修改。
+　　(2)多字段主键
+　　如果记录中任何一个字段都不可能保证唯一性，就可以使用多字段主键。这时，多个字段联合起来确保唯一性。如果出现这种情况，指定一个auto_increment整数作为
+主键是更好的办法。
+
+8.unique
+　　被赋予unique属性的列将确保所有值都有不同的值，只是null值可以重复。一般会指定一个列为unique，以确保该列的所有值都不同。例如：
+　　email varchar(45) unique
+
+9.zerofill
+　　zerofill属性可用于任何数值类型，用0填充所有剩余字段空间。例如，无符号int的默认宽度是10；因此，当“零填充”的int值为4时，将表示它为0000000004。
+   orderid int unsigned zerofill not null
+
+********************************************************************************************************************************
+三　Mysql使用
+
+1 概念
+(1) SQL(Structured Query Language):
+    访问关系数据库管理系统(RDBMS)的标准语言
+    适用数据库:MySQL, Oracle, PostgreSQL, Sybase 和　Microsoft SQL Server等
+    ANSI标准
+    MySQL的SQL和标准的SQL存在一些细微的差别.
+(2) DDL(Data Definition Language):
+    定义数据库的数据定义语言
+(3) DML(Data Manipulation Language):
+    查询数据库的数据操作语言
+
+2 插入数据
+INSERT [INTO] tablename [(column1, column2, column3, ...)] VALUES (value1, value2, value3, ...);
+
+INSERT INTO  customers VALUES (NULL, 'Julie Smith', '25 Oak Street', 'Airport West'); '''
+
+3 查询数据
+SELECT [options] items
+[INTO file_details]
+FROM tables
+[WHERE conditions]
+[GROUP BY group_type]
+[HAVING where_definition]
+[ORDER BY order_type]
+[LIMIT limit_criteria]
+[PROCEDURE proc_name(arguments)]
+[lock_options]
+;
+[例一：]查看没有任何可选子句的查询
+select name, city from customers;
+[例二：]获取满足特定条件的数据
+select *
+from customers
+where id = 3;
+[例三：]从多个表中获取数据
+关联操作：需要根据数据间的关系将两个或更多的表关联在一起
+(1)简单的双表关联
+select orders.orderid, orders.amount, orders.date
+from customers, orders  //表名称之间的逗号等价于输入INNER JOIN 或　CROSS JOIN, 有时也称为完全关联(full join)
+where customers.name = 'Julie Smith' //等价关联
+and customers.customerid = orders.customerid;
+(2)关联多个表
+....
+(3)查找不匹配行
+左关联：是在两个表之间指定的关联条件下匹配的数据行.如果右边的表中没有匹配行,结果中就会增加一行,该行右边的列为NULL
+select customers.customerid, customers.name, orders.orderid
+from customer left join orders
+on customers.customerid = orders.customerid
+
+4 更新数据
+UPDATE [LOW_PRIORITY] [IGNORE] tablename
+SET column1 = expression1, column2 = expression2, ...
+[WHERE condition]
+[ORDER BY order_criteria]
+[LIMIT number]
+
+[例一：]没有where子句的update语句
+update books
+set price = price * 1.1;
+[例二：]修改一行
+update customers
+set address = '250 Olsens Road'
+where customerid = 4;
+
+
+5 创建后修改表
+ALTER TABLE [IGNORE] tablename alteration [, alteration ...]
+注：在ANSI SQL中，每个ALTER TABLE语句只可实现一次修改，但是在mysql中允许实现多次修改．每个修改子句可以修改表的不同部分
+
+6 删除数据库中的记录
+DELETE [LOW_PRIORITY] [QUICK] [IGNORE] FROM table
+[WHERE condition]
+[ORDER BY order_cols]
+[LIMIT number]
+注：order by通常与limit结合使用
+
+7 表的删除
+DROP TABLE table;
+
+8 删除整个数据库
+DROP DATABASE database;
+
